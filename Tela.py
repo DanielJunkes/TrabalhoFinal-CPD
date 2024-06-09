@@ -98,6 +98,9 @@ txtEntrada.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
 btnSalvar = ctk.CTkButton(app, text="Salvar", command=create_task)
 btnSalvar.grid(row=0, column=1, padx=10, pady=10, sticky="w")
 
+btnChangeServer = ctk.CTkButton(app, text="Alterar Servidor", command=change_server)
+btnChangeServer.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+
 containerList = ctk.CTkFrame(app)
 containerList.grid(row=1, column=0, columnspan=2, rowspan=5, padx=10, pady=10, sticky="nsew")
 containerList.columnconfigure((0,1), weight=1)
@@ -124,9 +127,6 @@ labelTarefaCompleta.grid(row=0, column=0, padx=10, pady=10)
 
 checkListCompletas = CTkListbox(frameListaTarefasCompletas, command=delete_task)
 checkListCompletas.grid(row=1, rowspan=10, column=0, padx=3, pady=3, sticky="nswe")
-
-btnChangeServer = ctk.CTkButton(app, text="Alterar Servidor", command=change_server)
-btnChangeServer.grid(row=6, column=0, padx=10, pady=10)
 
 load_tasks()
 
