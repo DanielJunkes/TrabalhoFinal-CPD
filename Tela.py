@@ -13,7 +13,9 @@ tasks = []
 
 def create_task():
     if txtEntrada.get() in tasks:
-        print("Task already exists")
+        popup = ctk.CTkToplevel(master=app, width=300, height=300)
+        ctk.CTkLabel(master=popup, text="Task already exists!").grid(row=0, column=0, padx=10, pady=10)
+        ctk.CTkButton(master=popup, text="OK", command=popup.destroy).grid(row=0, column=0, padx=10, pady=10)
         return
     title = txtEntrada.get()
     if title:
