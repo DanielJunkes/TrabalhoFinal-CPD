@@ -9,7 +9,12 @@ from CTkListbox import *
 channel = grpc.insecure_channel('localhost:50051')
 stub = tasks_pb2_grpc.TaskServiceStub(channel)
 
+tasks = []
+
 def create_task():
+    if txtEntrada.get() in tasks:
+        print("Task already exists")
+        return
     title = txtEntrada.get()
     if title:
         task = tasks_pb2.Task(
@@ -21,10 +26,12 @@ def create_task():
         load_tasks()
 
 def load_tasks():
+    tasks.clear()
     checkListPendentes.delete(0, tk.END)
     checkListCompletas.delete(0, tk.END)
     response = stub.ListTasks(tasks_pb2.Empty())
     for task in response.tasks:
+        tasks.append(task.title)
         if task.status == "Pending":
             checkListPendentes.insert(tk.END, task.title)
         else:
@@ -40,7 +47,7 @@ def update_task(selected_option):
             
 def delete_task(selected_option):
     response = stub.ListTasks(tasks_pb2.Empty())
-    for task in response.tasks:
+    for task in response.tasks: 
         if task.title == selected_option and task.status == "Done":
             stub.DeleteTask(task)
             load_tasks()
