@@ -13,10 +13,9 @@ tasks = []
 
 def create_task():
     if txtEntrada.get() in tasks:
-        popup = ctk.CTkToplevel(master=app, width=300, height=300)
-        ctk.CTkLabel(master=popup, text="Task already exists!").grid(row=0, column=0, padx=10, pady=10)
-        ctk.CTkButton(master=popup, text="OK", command=popup.destroy).grid(row=0, column=0, padx=10, pady=10)
+        txt_task_exist.grid(row=0, column=0, sticky="s")
         return
+    txt_task_exist.grid_forget()
     title = txtEntrada.get()
     if title:
         task = tasks_pb2.Task(
@@ -60,11 +59,12 @@ app.geometry("700x500")
 app.rowconfigure((0,1,2,3,4), weight=1)
 app.columnconfigure((0,1), weight=1)
 
+txt_task_exist = ctk.CTkLabel(master=app, text="Task already exists!")
 txtEntrada = ctk.CTkEntry(app)
 txtEntrada.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
 
 btnSalvar = ctk.CTkButton(app, text="Salvar", command=create_task)
-btnSalvar.grid(row=0, column=1, padx=10, pady=10)
+btnSalvar.grid(row=0, column=1, padx=10, pady=10, sticky="w")
 
 containerList = ctk.CTkFrame(app)
 containerList.grid(row=1, column=0, columnspan=2, rowspan=5, padx=10, pady=10, sticky="nsew")
