@@ -1,5 +1,6 @@
 import tkinter as tk
 import customtkinter as ctk
+import tkinter.messagebox as messagebox
 import grpc
 import tasks_pb2
 import tasks_pb2_grpc
@@ -7,6 +8,13 @@ from CTkListbox import *
 
 # Configuração do cliente gRPC
 channel = grpc.insecure_channel('localhost:50051')
+
+try:
+    grpc.channel_ready_future(channel).result(timeout=5)
+except grpc.FutureTimeoutError:
+    messagebox.showerror("Erro", "O servidor não está acessível.")
+    exit()
+
 stub = tasks_pb2_grpc.TaskServiceStub(channel)
 
 tasks = []
@@ -20,7 +28,7 @@ def create_task():
     if title:
         task = tasks_pb2.Task(
             title=title,
-            status="Pending"
+            status="Pendente"
         )
         response = stub.CreateTask(task)
         txtEntrada.delete(0, tk.END)
@@ -33,7 +41,7 @@ def load_tasks():
     response = stub.ListTasks(tasks_pb2.Empty())
     for task in response.tasks:
         tasks.append(task.title)
-        if task.status == "Pending":
+        if task.status == "Pendente":
             checkListPendentes.insert(tk.END, task.title)
         else:
             checkListCompletas.insert(tk.END, task.title)
@@ -42,17 +50,39 @@ def update_task(selected_option):
     response = stub.ListTasks(tasks_pb2.Empty())
     for task in response.tasks:
         if task.title == selected_option:
-            task.status = "Done"
+            task.status = "Completa"
             stub.UpdateTask(task)
             load_tasks()
             
 def delete_task(selected_option):
     response = stub.ListTasks(tasks_pb2.Empty())
     for task in response.tasks: 
-        if task.title == selected_option and task.status == "Done":
+        if task.title == selected_option and task.status == "Completa":
             stub.DeleteTask(task)
             load_tasks()
     
+def change_server():
+    dialog = ctk.CTkToplevel()
+    dialog.title("Alterar Servidor")
+    dialog.geometry("300x100")
+    dialog.rowconfigure(0, weight=1)
+    dialog.columnconfigure(0, weight=1)
+    txtNewIP = ctk.CTkEntry(dialog)
+    txtNewIP.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
+    btnChange = ctk.CTkButton(dialog, text="Alterar", command=lambda: change_server_action(txtNewIP.get()))
+    btnChange.grid(row=1, column=0, padx=10, pady=10)
+
+def change_server_action(new_ip):
+    if new_ip:
+        global channel, stub
+        channel = grpc.insecure_channel(new_ip + ':50051')
+        try:
+            grpc.channel_ready_future(channel).result(timeout=5)
+            stub = tasks_pb2_grpc.TaskServiceStub(channel)
+            load_tasks()
+        except grpc.FutureTimeoutError:
+            messagebox.showerror("Erro", "Não foi possível conectar ao novo servidor.")
+
 
 app = ctk.CTk()
 app.geometry("700x500")
@@ -92,6 +122,9 @@ labelTarefaCompleta.grid(row=0, column=0, padx=10, pady=10)
 
 checkListCompletas = CTkListbox(frameListaTarefasCompletas, command=delete_task)
 checkListCompletas.grid(row=1, rowspan=10, column=0, padx=3, pady=3, sticky="nswe")
+
+btnChangeServer = ctk.CTkButton(app, text="Alterar Servidor", command=change_server)
+btnChangeServer.grid(row=6, column=0, padx=10, pady=10)
 
 load_tasks()
 
