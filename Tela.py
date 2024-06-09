@@ -5,15 +5,15 @@ import grpc
 import tasks_pb2
 import tasks_pb2_grpc
 from CTkListbox import *
+import subprocess
 
 # Configuração do cliente gRPC
 channel = grpc.insecure_channel('localhost:50051')
 
 try:
-    grpc.channel_ready_future(channel).result(timeout=5)
+    grpc.channel_ready_future(channel).result(timeout=1)
 except grpc.FutureTimeoutError:
-    messagebox.showerror("Erro", "O servidor não está acessível.")
-    exit()
+    subprocess.Popen("py task_server.py", shell=False)
 
 stub = tasks_pb2_grpc.TaskServiceStub(channel)
 
@@ -69,27 +69,29 @@ def change_server():
     dialog.columnconfigure(0, weight=1)
     txtNewIP = ctk.CTkEntry(dialog)
     txtNewIP.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
-    btnChange = ctk.CTkButton(dialog, text="Alterar", command=lambda: change_server_action(txtNewIP.get()))
+    btnChange = ctk.CTkButton(dialog, text="Alterar", command=lambda: change_server_action(txtNewIP.get(), dialog))
     btnChange.grid(row=1, column=0, padx=10, pady=10)
 
-def change_server_action(new_ip):
+def change_server_action(new_ip, top_level = None):
     if new_ip:
         global channel, stub
         channel = grpc.insecure_channel(new_ip + ':50051')
         try:
             grpc.channel_ready_future(channel).result(timeout=5)
             stub = tasks_pb2_grpc.TaskServiceStub(channel)
+            top_level.destroy()
             load_tasks()
         except grpc.FutureTimeoutError:
             messagebox.showerror("Erro", "Não foi possível conectar ao novo servidor.")
 
 
 app = ctk.CTk()
+app.title("Gerenciador de tarefas")
 app.geometry("700x500")
 app.rowconfigure((0,1,2,3,4), weight=1)
 app.columnconfigure((0,1), weight=1)
 
-txt_task_exist = ctk.CTkLabel(master=app, text="Task already exists!")
+txt_task_exist = ctk.CTkLabel(master=app, text="Tarefa já existente!")
 txtEntrada = ctk.CTkEntry(app)
 txtEntrada.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
 
