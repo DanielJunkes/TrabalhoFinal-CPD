@@ -7,7 +7,6 @@ import tasks_pb2_grpc
 from CTkListbox import *
 import subprocess
 
-# Configuração do cliente gRPC
 channel = grpc.insecure_channel('localhost:50051')
 
 try:
@@ -30,7 +29,7 @@ def create_task():
             title=title,
             status="Pendente"
         )
-        response = stub.CreateTask(task)
+        stub.CreateTask(task)
         txtEntrada.delete(0, tk.END)
         load_tasks()
 
